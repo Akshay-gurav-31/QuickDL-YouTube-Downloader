@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuickDL - Fast & Free YouTube Downloader</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/manifest.webmanifest">
+    <link rel="icon" href="/favicon.ico">
+    <script src="/_sdk/element_sdk.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            box-sizing: border-box;
+        }
+
+        * {
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8f9fa;
+            --text-primary: #1a1a1a;
+            --text-secondary: #6b7280;
+            --accent-primary: #FF0000;
+            --accent-hover: #CC0000;
+            --border-color: #e8e8e8;
+            --success-color: #10b981;
+            --error-color: #ef4444;
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+            --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.08);
+        }
+
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            background: var(--bg-primary);
+        }
+
+        .main-wrapper {
+            min-height: 100%;
+            width: 100%;
+            background: var(--bg-primary);
+            overflow-y: auto;
+        }
+
+        /* Typography */
+        .hero-title {
+            font-size: 3rem;
+            font-weight: 700;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+            color: var(--text-primary);
+        }
+
+        .hero-subtitle {
+            font-size: 1.125rem;
+            font-weight: 400;
+            line-height: 1.6;
+            color: var(--text-secondary);
+        }
+
+        .section-heading {
+            font-size: 2rem;
+            font-weight: 700;
+            line-height: 1.2;
+            letter-spacing: -0.02em;
+            color: var(--text-primary);
+        }
+
+        .feature-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            line-height: 1.3;
+            color: var(--text-primary);
+        }
+
+        .feature-desc {
+            font-size: 1rem;
+            font-weight: 400;
+            line-height: 1.6;
+            color: var(--text-secondary);
+        }
+
+        .overline {
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--accent-primary);
+        }
+
+        /* Header */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 50;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* Input Group */
+        .input-group {
+            display: flex;
+            gap: 0;
+            max-width: 640px;
+            margin: 0 auto;
+            box-shadow: var(--shadow-lg);
+            border-radius: 16px;
+        }
+
+        .url-input {
+            flex: 1;
+            height: 60px;
+            padding: 18px 24px;
+            font-size: 1rem;
+            border: 2px solid var(--border-color);
+            border-right: none;
+            border-radius: 16px 0 0 16px;
+            background: white;
+            color: var(--text-primary);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            outline: none;
+        }
+
+        .url-input::placeholder {
+            color: #9ca3af;
+        }
+
+        .url-input:focus {
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 4px rgba(255, 0, 0, 0.08);
+        }
+
+        .download-btn {
+            min-width: 180px;
+            height: 60px;
+            padding: 18px 32px;
+            font-size: 1rem;
+            font-weight: 600;
+            background: var(--accent-primary);
+            color: white;
+            border: none;
+            border-radius: 0 16px 16px 0;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .download-btn:hover:not(:disabled) {
+            background: var(--accent-hover);
+            box-shadow: 0 8px 24px rgba(255, 0, 0, 0.2);
+        }
+
+        .download-btn:active:not(:disabled) {
+            transform: scale(0.98);
+        }
+
+        .download-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Feature Cards */
+        .feature-card {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 2.5rem;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .feature-card:hover {
+            box-shadow: var(--shadow-lg);
+            border-color: rgba(255, 0, 0, 0.1);
+        }
+
+        .feature-icon {
+            width: 56px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            color: var(--accent-primary);
+            background: rgba(255, 0, 0, 0.05);
+            border-radius: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover .feature-icon {
+            background: rgba(255, 0, 0, 0.1);
+            transform: scale(1.05);
+        }
+
+        /* Result Card */
+        .result-card {
+            max-width: 640px;
+            margin: 2rem auto 0;
+            padding: 3rem;
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            box-shadow: var(--shadow-lg);
+            text-align: center;
+            animation: slideUp 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--border-color);
+            border-top-color: var(--accent-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .success-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 1rem;
+            color: var(--success-color);
+        }
+
+        .error-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 1rem;
+            color: var(--error-color);
+        }
+
+        /* Video Preview */
+        .video-preview {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin: 1.5rem 0;
+            padding: 1rem;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+        }
+
+        .video-thumbnail {
+            width: 120px;
+            height: 90px;
+            border-radius: 6px;
+            background: var(--border-color);
+            object-fit: cover;
+        }
+
+        .video-info {
+            flex: 1;
+            text-align: left;
+        }
+
+        .video-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .video-duration {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        /* Quality Selection */
+        .quality-options {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .quality-btn {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px;
+            background: white;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-align: left;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .quality-btn:hover {
+            border-color: var(--accent-primary);
+            box-shadow: var(--shadow-md);
+        }
+
+        .quality-btn.active {
+            background: rgba(255, 0, 0, 0.05);
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(255, 0, 0, 0.1);
+        }
+
+        /* Premium (Best) Quality Styles */
+        .quality-btn.premium {
+            border-color: #FFD700;
+            background: linear-gradient(135deg, #fff9e6 0%, #ffffff 100%);
+        }
+
+        .quality-btn.premium:hover {
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.25);
+            border-color: #FFD700;
+        }
+
+        .quality-btn.premium.active {
+            box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.3);
+            background: #fff9e6;
+        }
+
+        .crown-icon {
+            color: #FFD700;
+            filter: drop-shadow(0 2px 4px rgba(255, 215, 0, 0.2));
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-3px);
+            }
+        }
+
+        .quality-btn svg {
+            flex-shrink: 0;
+            color: var(--text-secondary);
+            transition: color 0.2s ease;
+        }
+
+        .quality-btn.active svg {
+            color: var(--accent-primary);
+        }
+
+        .quality-btn.premium svg {
+            color: #DAA520;
+            /* Goldenrod */
+        }
+
+        .quality-label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .quality-size {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2rem;
+            }
+
+            .hero-subtitle {
+                font-size: 1rem;
+            }
+
+            .section-heading {
+                font-size: 1.5rem;
+            }
+
+            .input-group {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .url-input {
+                border-radius: 16px;
+                border-right: 2px solid var(--border-color);
+            }
+
+            .download-btn {
+                border-radius: 16px;
+                width: 100%;
+            }
+
+            .feature-card {
+                padding: 1.5rem;
+            }
+
+            .video-preview {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .video-info {
+                text-align: center;
+            }
+
+            .quality-options {
+                grid-template-columns: 1fr;
+            }
+
+            .quality-btn {
+                padding: 14px;
+            }
+        }
+
+        /* Background decoration */
+        .hero-bg-decoration {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 400px;
+            height: 400px;
+            opacity: 0.03;
+            pointer-events: none;
+        }
+    </style>
+</head>
+
+<body class="h-full">
+    <div class="main-wrapper">
+        <!-- Header -->
+        <header class="header">
+            <div class="max-w-7xl mx-auto px-6 py-4">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center gap-3">
+                        <img src="/android-chrome-512x512.png" width="32" height="32" alt="QuickDL Logo"
+                            style="border-radius: 8px;">
+                        <span class="text-xl font-bold" style="color: var(--text-primary);">QuickDL</span>
+                    </div>
+                    <nav class="hidden md:flex items-center gap-6">
+                        <a href="#features" class="text-sm font-medium"
+                            style="color: var(--text-secondary); transition: color 0.2s;"
+                            onmouseover="this.style.color='var(--accent-primary)'"
+                            onmouseout="this.style.color='var(--text-secondary)'">Features</a>
+                        <a href="#how-it-works" class="text-sm font-medium"
+                            style="color: var(--text-secondary); transition: color 0.2s;"
+                            onmouseover="this.style.color='var(--accent-primary)'"
+                            onmouseout="this.style.color='var(--text-secondary)'">How it works</a>
+                    </nav>
+                </div>
+            </div>
+        </header>
+
+        <!-- Hero Section -->
+        <section class="relative pt-32 pb-24 px-6" style="min-height: 70%; background: var(--bg-primary);">
+            <svg class="hero-bg-decoration" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                <path fill="currentColor" d="M50 100L100 60V140L50 100Z" />
+                <rect x="110" y="70" width="30" height="60" fill="currentColor" />
+            </svg>
+
+            <div class="max-w-5xl mx-auto text-center relative z-10">
+                <div class="overline mb-4" id="hero-overline">FREE YOUTUBE DOWNLOADER</div>
+                <h1 class="hero-title mb-6 max-w-4xl mx-auto" id="hero-title">
+                    Download YouTube Videos Easily
+                </h1>
+                <p class="hero-subtitle mb-12 max-w-2xl mx-auto" id="hero-subtitle">
+                    Paste any YouTube URL and download videos in high quality. Fast, simple, and completely free.
+                </p>
+
+                <!-- Input Group -->
+                <form id="download-form" class="mb-4">
+                    <div class="input-group">
+                        <input type="text" id="url-input" class="url-input" placeholder="Paste YouTube URL here..."
+                            aria-label="YouTube URL" required>
+                        <button type="submit" class="download-btn" id="download-btn">
+                            <span id="btn-text">Download</span>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="7 10 12 15 17 10"></polyline>
+                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                            </svg>
+                        </button>
+                    </div>
+                </form>
+
+                <p class="text-sm" style="color: #a3a3a3;">Supports all YouTube video URLs • Multiple quality options
+                </p>
+
+                <!-- Result Container -->
+                <div id="result-container"></div>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section id="features" class="py-24 px-6" style="background: var(--bg-secondary);">
+            <div class="max-w-6xl mx-auto">
+                <div class="text-center mb-16">
+                    <div class="overline mb-4">FEATURES</div>
+                    <h2 class="section-heading max-w-3xl mx-auto" id="features-heading">
+                        Why Choose QuickDL?
+                    </h2>
+                </div>
+
+                <div class="grid md:grid-cols-3 gap-8">
+                    <!-- Feature 1 -->
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                            </svg>
+                        </div>
+                        <h3 class="feature-title mb-3" id="feature-1-title">Lightning Fast</h3>
+                        <p class="feature-desc" id="feature-1-desc">Download videos in seconds with our optimized
+                            servers. No waiting, no delays.</p>
+                    </div>
+
+                    <!-- Feature 2 -->
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                            </svg>
+                        </div>
+                        <h3 class="feature-title mb-3" id="feature-2-title">Safe & Secure</h3>
+                        <p class="feature-desc" id="feature-2-desc">No malware, no tracking, no data collection. Your
+                            privacy is our priority.</p>
+                    </div>
+
+                    <!-- Feature 3 -->
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="12" cy="7" r="4"></circle>
+                            </svg>
+                        </div>
+                        <h3 class="feature-title mb-3" id="feature-3-title">No Registration</h3>
+                        <p class="feature-desc" id="feature-3-desc">No signup, no login required. Start downloading
+                            videos immediately.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- How It Works Section -->
+        <section id="how-it-works" class="py-24 px-6" style="background: var(--bg-primary);">
+            <div class="max-w-4xl mx-auto">
+                <div class="text-center mb-16">
+                    <div class="overline mb-4">HOW IT WORKS</div>
+                    <h2 class="section-heading mb-4">Download in 3 Simple Steps</h2>
+                    <p class="hero-subtitle">Get your favorite videos in seconds</p>
+                </div>
+
+                <div class="grid md:grid-cols-3 gap-12">
+                    <!-- Step 1 -->
+                    <div class="text-center">
+                        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full mb-6"
+                            style="background: var(--accent-primary); color: white; font-size: 1.5rem; font-weight: 700;">
+                            1</div>
+                        <h3 class="feature-title mb-3">Copy YouTube URL</h3>
+                        <p class="feature-desc">Find the video you want and copy its URL from your browser</p>
+                    </div>
+
+                    <!-- Step 2 -->
+                    <div class="text-center">
+                        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full mb-6"
+                            style="background: var(--accent-primary); color: white; font-size: 1.5rem; font-weight: 700;">
+                            2</div>
+                        <h3 class="feature-title mb-3">Paste URL Above</h3>
+                        <p class="feature-desc">Paste the URL in the input field at the top of the page</p>
+                    </div>
+
+                    <!-- Step 3 -->
+                    <div class="text-center">
+                        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full mb-6"
+                            style="background: var(--accent-primary); color: white; font-size: 1.5rem; font-weight: 700;">
+                            3</div>
+                        <h3 class="feature-title mb-3">Download Video</h3>
+                        <p class="feature-desc">Click download and save the video to your device instantly</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="py-12 px-6" style="background: var(--bg-secondary); border-top: 1px solid var(--border-color);">
+            <div class="max-w-6xl mx-auto text-center">
+                <div class="flex items-center justify-center gap-3 mb-3">
+                    <svg width="28" height="28" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="32" height="32" rx="8" fill="#FF0000" />
+                        <path
+                            d="M9.5 11.5C7.29 11.5 5.5 13.29 5.5 15.5C5.5 17.71 7.29 19.5 9.5 19.5C11.16 19.5 12.61 18.49 13.5 17C14.39 18.49 15.84 19.5 17.5 19.5C19.71 19.5 21.5 17.71 21.5 15.5C21.5 13.29 19.71 11.5 17.5 11.5C15.84 11.5 14.39 12.51 13.5 14C12.61 12.51 11.16 11.5 9.5 11.5ZM9.5 13.5C10.6 13.5 11.5 14.4 11.5 15.5C11.5 16.6 10.6 17.5 9.5 17.5C8.4 17.5 7.5 16.6 7.5 15.5C7.5 14.4 8.4 13.5 9.5 13.5ZM17.5 13.5C18.6 13.5 19.5 14.4 19.5 15.5C19.5 16.6 18.6 17.5 17.5 17.5C16.4 17.5 15.5 16.6 15.5 15.5C15.5 14.4 16.4 13.5 17.5 13.5Z"
+                            fill="white" transform="translate(2.5, 0.5) scale(1)" />
+                        <path
+                            d="M21.5 11.5C19.3 11.5 17.41 12.69 16 14.47C14.59 12.69 12.7 11.5 10.5 11.5C7.46 11.5 5 13.96 5 17C5 20.04 7.46 22.5 10.5 22.5C12.7 22.5 14.59 21.31 16 19.53C17.41 21.31 19.3 22.5 21.5 22.5C24.54 22.5 27 20.04 27 17C27 13.96 24.54 11.5 21.5 11.5ZM10.5 20.5C8.57 20.5 7 18.93 7 17C7 15.07 8.57 13.5 10.5 13.5C11.83 13.5 12.98 14.23 13.56 15.31C13.25 15.84 12.89 16.32 12.48 16.76C12.02 17.26 11.33 17.84 10.5 17.84C10.04 17.84 9.67 17.47 9.67 17C9.67 16.53 10.04 16.16 10.5 16.16C10.74 16.16 10.95 16.27 11.09 16.44C11.23 16.59 11.36 16.7 11.45 16.79C11.66 16.6 11.86 16.4 12.05 16.19C12.59 15.55 13.06 14.83 13.43 14.06C13.88 14.67 14.12 15.39 14.12 16.14C14.12 18.15 12.49 19.8 10.5 20.45V20.5ZM21.5 20.5C19.51 20.5 17.88 18.85 17.88 16.84C17.88 16.09 18.12 15.37 18.57 14.76C18.94 15.53 19.41 16.25 19.95 16.89C20.14 17.1 20.34 17.3 20.55 17.49C20.64 17.4 20.77 17.29 20.91 17.14C21.05 16.97 21.26 16.86 21.5 16.86C21.96 16.86 22.33 17.23 22.33 17.7C22.33 18.17 21.96 18.54 21.5 18.54C20.67 18.54 19.98 17.96 19.52 17.46C19.11 17.02 18.75 16.54 18.44 16.01C19.02 14.93 20.17 14.2 21.5 14.2C23.43 14.2 25 15.77 25 17.7C25 19.63 23.43 21.2 21.5 21.2V20.5Z"
+                            fill="white" stroke="white" stroke-width="2" />
+                    </svg>
+                    <span class="text-lg font-bold" style="color: var(--text-primary);">QuickDL</span>
+                </div>
+                <p class="text-sm mb-4" style="color: var(--text-secondary);">Fast & Free YouTube Downloader</p>
+                <p class="text-sm" style="color: var(--text-secondary);" id="footer-copyright">© 2026 QuickDL. All
+                    rights reserved.</p>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // === CONSTANTS ===
+        const API_BASE_URL = 'http://localhost:5000/api';
+        const DEFAULT_QUALITY = '1080p';
+
+        // Config constants
+        const DEFAULT_CONFIG = {
+            bg_primary: "#ffffff",
+            bg_secondary: "#f8f9fa",
+            text_primary: "#1a1a1a",
+            text_secondary: "#6b7280",
+            accent_primary: "#FF0000",
+            font_family: "Poppins",
+            font_size: 16,
+            hero_title: "Download YouTube Videos Easily",
+            hero_subtitle: "Paste any YouTube URL and download videos in high quality. Fast, simple, and completely free.",
+            cta_button_text: "Download",
+            features_heading: "Why Choose QuickDL?",
+            feature_1_title: "Lightning Fast",
+            feature_1_desc: "Download videos in seconds with our optimized servers. No waiting, no delays.",
+            feature_2_title: "Safe & Secure",
+            feature_2_desc: "No malware, no tracking, no data collection. Your privacy is our priority.",
+            feature_3_title: "No Registration",
+            feature_3_desc: "No signup, no login required. Start downloading videos immediately.",
+            footer_copyright: "© 2026 QuickDL. All rights reserved."
+        };
+
+        // DOM Elements
+        const form = document.getElementById('download-form');
+        const urlInput = document.getElementById('url-input');
+        const downloadBtn = document.getElementById('download-btn');
+        const btnText = document.getElementById('btn-text');
+        const resultContainer = document.getElementById('result-container');
+
+        // State
+        let state = {
+            currentVideoUrl: '',
+            selectedQuality: DEFAULT_QUALITY
+        };
+
+        /**
+        * Initializes the Element SDK coordination
+        */
+        function initSdk() {
+            if (!window.elementSdk) return;
+
+            window.elementSdk.init({
+                defaultConfig: DEFAULT_CONFIG,
+                onConfigChange: handleConfigChange,
+                mapToCapabilities: getCapabilitiesMap,
+                mapToEditPanelValues: getEditPanelValues
+            });
+        }
+
+        /**
+        * Handles configuration changes from the SDK
+        */
+        async function handleConfigChange(config) {
+            const root = document.documentElement;
+            const customFont = config.font_family || DEFAULT_CONFIG.font_family;
+            const baseSize = config.font_size || DEFAULT_CONFIG.font_size;
+
+            // Update CSS variables
+            const colorMap = {
+                '--bg-primary': config.bg_primary,
+                '--bg-secondary': config.bg_secondary,
+                '--text-primary': config.text_primary,
+                '--text-secondary': config.text_secondary,
+                '--accent-primary': config.accent_primary
+            };
+
+            Object.entries(colorMap).forEach(([prop, value]) => {
+                root.style.setProperty(prop, value || DEFAULT_CONFIG[prop.replace('--', '').replace('-', '_')]);
+            });
+
+            // Update Typography
+            document.body.style.fontFamily = `'${customFont}', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
+
+            const sizeMap = {
+                '.hero-title': 3,
+                '.hero-subtitle': 1.125,
+                '.section-heading': 2,
+                '.feature-title': 1.25,
+                '.feature-desc': 1
+            };
+
+            Object.entries(sizeMap).forEach(([selector, multiplier]) => {
+                document.querySelectorAll(selector).forEach(el => {
+                    el.style.fontSize = `${baseSize * multiplier}px`;
+                });
+            });
+
+            // Update Text Content
+            updateTextContent('hero-title', config.hero_title);
+            updateTextContent('hero-subtitle', config.hero_subtitle);
+            updateTextContent('btn-text', config.cta_button_text);
+            updateTextContent('features-heading', config.features_heading);
+            updateTextContent('footer-copyright', config.footer_copyright);
+
+            // Loop for features
+            for (let i = 1; i <= 3; i++) {
+                updateTextContent(`feature-${i}-title`, config[`feature_${i}_title`]);
+                updateTextContent(`feature-${i}-desc`, config[`feature_${i}_desc`]);
+            }
+        } function updateTextContent(id, value) {
+            const el = document.getElementById(id); if (el) el.textContent = value || DEFAULT_CONFIG[id.replace(/-/g, '_')];
+        }
+        // SDK helper functions
+        function getCapabilitiesMap(config) {
+            const createColorCap = (key) => ({
+                get: () => config[key] || DEFAULT_CONFIG[key],
+                set: (val) => {
+                    config[key] = val;
+                    if (window.elementSdk) window.elementSdk.setConfig({ [key]: val });
+                }
+            });
+
+            return {
+                recolorables: ['bg_primary', 'bg_secondary', 'text_primary', 'text_secondary', 'accent_primary'].map(createColorCap),
+                borderables: [],
+                fontEditable: {
+                    get: () => config.font_family || DEFAULT_CONFIG.font_family,
+                    set: (val) => {
+                        config.font_family = val;
+                        if (window.elementSdk) window.elementSdk.setConfig({ font_family: val });
+                    }
+                },
+                fontSizeable: {
+                    get: () => config.font_size || DEFAULT_CONFIG.font_size,
+                    set: (val) => {
+                        config.font_size = val;
+                        if (window.elementSdk) window.elementSdk.setConfig({ font_size: val });
+                    }
+                }
+            };
+        }
+
+        function getEditPanelValues(config) {
+            const map = new Map();
+            const keys = [
+                "hero_title", "hero_subtitle", "cta_button_text", "features_heading",
+                "footer_copyright", "feature_1_title", "feature_1_desc",
+                "feature_2_title", "feature_2_desc", "feature_3_title", "feature_3_desc"
+            ];
+
+            keys.forEach(key => map.set(key, config[key] || DEFAULT_CONFIG[key]));
+            return map;
+        }
+
+        /**
+        * DOM Event Listeners
+        */
+        form.addEventListener('submit', handleFormSubmit);
+
+        /**
+        * Main Form Handler
+        */
+        async function handleFormSubmit(e) {
+            e.preventDefault();
+            const url = urlInput.value.trim();
+
+            if (!isValidYouTubeUrl(url)) {
+                renderError('Please enter a valid YouTube URL');
+                return;
+            }
+
+            renderLoading();
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/info`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    state.currentVideoUrl = url;
+                    renderSuccess(data);
+                } else {
+                    renderError(data.error || 'Could not fetch video info.');
+                }
+            } catch (error) {
+                console.error('API Error:', error);
+                renderError('Could not connect to the server. Make sure the backend is running.');
+            }
+        }
+
+        /**
+        * Validators
+        */
+        function isValidYouTubeUrl(url) {
+            if (!url) return false;
+            const patterns = [
+                /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+$/,
+                /^(https?:\/\/)?(www\.)?youtube\.com\/watch\?v=.+$/,
+                /^(https?:\/\/)?youtu\.be\/.+$/
+            ];
+            return patterns.some(pattern => pattern.test(url));
+        }
+
+        /**
+        * Quality Selection Handler
+        */
+        window.selectQuality = function (btn, quality) {
+            const btns = document.querySelectorAll('.quality-btn');
+            btns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            state.selectedQuality = quality;
+            updateDownloadButtonText(quality);
+        };
+
+        function updateDownloadButtonText(quality) {
+            const downloadBtn = document.getElementById('final-download-btn');
+            if (!downloadBtn) return;
+
+            const qualityLabels = {
+                '1080p': '1080p Full HD',
+                '720p': '720p HD',
+                '480p': '480p SD',
+                '360p': '360p'
+            };
+
+            const label = qualityLabels[quality] || quality;
+            downloadBtn.querySelector('span').textContent = `Download ${label}`;
+        }
+
+        /**
+        * Download Trigger Handler
+        */
+        window.downloadVideo = function () {
+            if (!state.currentVideoUrl) return;
+
+            showDownloadStartedToast(state.selectedQuality);
+
+            // Construct Download URL
+            const params = new URLSearchParams({
+                url: state.currentVideoUrl,
+                quality: state.selectedQuality
+            });
+
+            window.location.href = `${API_BASE_URL}/download?${params.toString()}`;
+        };
+
+        function showDownloadStartedToast(quality) {
+            const messageDiv = document.createElement('div');
+            messageDiv.textContent = `✓ Download started! ${quality}`;
+
+            // Styling for toast
+            Object.assign(messageDiv.style, {
+                position: 'fixed',
+                top: '100px',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                background: 'var(--success-color)',
+                color: 'white',
+                padding: '1rem 2rem',
+                borderRadius: '8px',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                zIndex: '100',
+                animation: 'slideUp 0.3s ease-out'
+            });
+
+            document.body.appendChild(messageDiv);
+
+            // Auto dismiss
+            setTimeout(() => {
+                messageDiv.style.opacity = '0';
+                messageDiv.style.transition = 'opacity 0.3s ease';
+                setTimeout(() => messageDiv.remove(), 300);
+            }, 3000);
+        }
+
+        window.resetForm = function () {
+            urlInput.value = '';
+            resultContainer.innerHTML = '';
+            state.selectedQuality = DEFAULT_QUALITY;
+            urlInput.focus();
+        };
+
+        /**
+        * UI Renderers
+        */
+        function renderLoading() {
+            setDownloadButtonState(true, 'Processing...');
+            resultContainer.innerHTML = `
+        <div class="result-card">
+            <div class="spinner"></div>
+            <p class="text-base font-medium" style="color: var(--text-primary);">Fetching video information...</p>
+            <p class="text-sm mt-2" style="color: var(--text-secondary);">This will only take a few seconds</p>
+        </div>
+        `;
+        }
+
+        function renderError(message) {
+            setDownloadButtonState(false);
+            resultContainer.innerHTML = `
+        <div class="result-card">
+            <div class="error-icon">
+                ${getSvgIcon('error')}
+            </div>
+            <h3 class="text-xl font-semibold mb-2" style="color: var(--error-color);">Download Failed</h3>
+            <p class="text-base mb-6" style="color: var(--text-secondary);">${message}</p>
+            <button onclick="resetForm()" class="download-btn" style="width: 100%; background: var(--text-primary);">
+                Try Again
+            </button>
+        </div>
+        `;
+        }
+
+        function renderSuccess(video) {
+            setDownloadButtonState(false);
+            resultContainer.innerHTML = `
+        <div class="result-card">
+            <div class="success-icon">${getSvgIcon('success')}</div>
+            <h3 class="text-xl font-semibold mb-2" style="color: var(--text-primary);">Ready to Download!</h3>
+
+            <div class="video-preview">
+                <img src="${video.thumbnail}" class="video-thumbnail" alt="Video thumbnail">
+                <div class="video-info">
+                    <div class="video-title" title="${video.title}">${video.title}</div>
+                    <div class="video-duration">Duration: ${video.duration}</div>
+                </div>
+            </div>
+
+            <div style="margin: 1.5rem 0;">
+                <p class="text-sm font-semibold mb-3" style="color: var(--text-primary); text-align: left;">Select Video
+                    Quality:</p>
+                <div class="quality-options">
+                    ${renderQualityButton('1080p', '~100-150 MB', true, true)}
+                    ${renderQualityButton('720p', '~50-80 MB')}
+                    ${renderQualityButton('480p', '~30-50 MB')}
+                    ${renderQualityButton('360p', '~20-30 MB')}
+                </div>
+            </div>
+
+            <button onclick="downloadVideo()" class="download-btn" id="final-download-btn"
+                style="width: 100%; margin-top: 1rem;">
+                <span>Download 1080p Full HD</span>
+                ${getSvgIcon('download-small')}
+            </button>
+
+            <button onclick="resetForm()" class="mt-4 text-sm font-medium"
+                style="color: var(--accent-primary); background: none; border: none; cursor: pointer;">
+                Download another video
+            </button>
+        </div>
+        `;
+        }
+
+        function renderQualityButton(quality, size, isActive = false, isPremium = false) {
+            const labelMap = { '1080p': 'Full HD', '720p': 'HD', '480p': 'SD', '360p': '' };
+            const fullLabel = `${quality} ${labelMap[quality] || ''}`.trim();
+            const activeClass = isActive ? 'active' : '';
+            const premiumClass = isPremium ? 'premium' : '';
+            const crownIcon = isPremium ? getSvgIcon('crown') : '';
+
+            return `
+        <button class="quality-btn ${activeClass} ${premiumClass}" data-quality="${quality}"
+            onclick="selectQuality(this, '${quality}')">
+            ${getSvgIcon('check-box')}
+            <div>
+                <div class="quality-label">
+                    ${fullLabel}
+                    ${crownIcon}
+                </div>
+                <div class="quality-size">${size}</div>
+            </div>
+        </button>
+        `;
+        }
+
+        function setDownloadButtonState(disabled, text = null) {
+            downloadBtn.disabled = disabled;
+            if (text) btnText.textContent = text;
+            else btnText.textContent = window.elementSdk?.config?.cta_button_text || DEFAULT_CONFIG.cta_button_text;
+        }
+
+        function getSvgIcon(name) {
+            const icons = {
+                'error': `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="15" y1="9" x2="9" y2="15"></line>
+            <line x1="9" y1="9" x2="15" y2="15"></line>
+        </svg>`,
+                'success': `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+        </svg>`,
+                'download-small': `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+        </svg>`,
+                'check-box': `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2">
+            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+            <line x1="8" y1="21" x2="16" y2="21"></line>
+            <line x1="12" y1="17" x2="12" y2="21"></line>
+        </svg>`,
+                'crown': `<svg class="crown-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"
+            xmlns="http://www.w3.org/2000/svg">
+            <path d="M2 18h20v2H2v-2zm0-5l5-2 5 2 5-2 5 2v3H2v-3zm0-8l5 7 5-7 5 7 5-7v6H2V5z" />
+        </svg>`
+            };
+            return icons[name] || '';
+        }
+
+        // Initialize App
+        initSdk();
+    </script>
+</body>
+
+</html>
