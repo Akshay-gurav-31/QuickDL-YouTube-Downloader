@@ -1,0 +1,27 @@
+# General
+.DS_Store
+Thumbs.db
+*.log
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+env/
+.env
+
+# Flask
+instance/
+.webassets-cache
+
+# Node
+node_modules/
+npm-debug.log
+
+# Project Specific
+backend/downloads/
+downloads/
+*.mp4
+*.mkv
+*.webm
