@@ -655,7 +655,14 @@
 
     <script>
         // === CONSTANTS ===
-        const API_BASE_URL = 'http://localhost:5000/api';
+
+        // 1. FOR LOCAL DEVELOPMENT: 'http://localhost:5000/api'
+        // 2. FOR PRODUCTION (Render): 'https://your-app-name.onrender.com/api'
+
+        const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        const PRODUCTION_API = 'https://replace-me-with-your-render-url.onrender.com/api'; // <--- REPLACE THIS AFTER DEPLOYING BACKEND
+
+        const API_BASE_URL = isLocal ? 'http://localhost:5000/api' : PRODUCTION_API;
         const DEFAULT_QUALITY = '1080p';
 
         // Config constants
