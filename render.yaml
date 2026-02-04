@@ -1,0 +1,33 @@
+services:
+  # Backend Service
+  - type: web
+    name: quickdl-backend
+    env: python
+    buildCommand: pip install -r backend/requirements.txt && mkdir -p backend/bin && curl -L https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v4.4.1/ffmpeg-4.4.1-linux-64.zip -o ffmpeg.zip && unzip -o ffmpeg.zip -d backend/bin && curl -L https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v4.4.1/ffprobe-4.4.1-linux-64.zip -o ffprobe.zip && unzip -o ffprobe.zip -d backend/bin && rm ffmpeg.zip ffprobe.zip && chmod +x backend/bin/ffmpeg backend/bin/ffprobe
+    startCommand: PATH=$PATH:$(pwd)/backend/bin gunicorn --chdir backend app:app
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.10.0
+
+  # Frontend Service (Static Site)
+  - type: static
+    name: quickdl-frontend
+    env: static
+    buildCommand: ""
+    publishPath: frontend
+    headers:
+      - path: /logo.png
+        headers:
+          - key: Cache-Control
+            value: public, max-age=31536000, immutable
+      - path: /favicon.ico
+        headers:
+          - key: Cache-Control
+            value: public, max-age=31536000, immutable
+    routes:
+      - type: rewrite
+        src: /api/(.*)
+        dest: https://quickdl-backend.onrender.com/api/$1
+      - type: rewrite
+        src: /(.*)
+        dest: /index.html
